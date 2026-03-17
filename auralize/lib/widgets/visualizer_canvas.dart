@@ -6,11 +6,12 @@ import '../audio/audio_state.dart';
 import '../visualizers/bar_visualizer.dart';
 import '../visualizers/circular_visualizer.dart';
 import '../visualizers/particle_visualizer.dart';
+import '../visualizers/wave_visualizer.dart'; // New import
 
-enum VisualizerMode { bars, circular, particles }
+enum VisualizerMode { bars, circular, particles, wave } // Added wave
 
 final visualizerModeProvider = StateProvider<VisualizerMode>(
-  (ref) => VisualizerMode.bars,
+  (ref) => VisualizerMode.wave, // Default to wave for testing
 );
 
 class VisualizerCanvas extends ConsumerStatefulWidget {
@@ -100,6 +101,9 @@ class _VisualizerCanvasState extends ConsumerState<VisualizerCanvas>
           particles: _particles,
           beatDetected: service.detectBeat(),
         );
+        break;
+      case VisualizerMode.wave:
+        painter = WaveVisualizer(fftData: service.smoothedFFT);
         break;
     }
 

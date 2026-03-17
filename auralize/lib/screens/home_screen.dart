@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../audio/audio_state.dart';
 import '../widgets/visualizer_canvas.dart';
@@ -127,15 +128,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'AURALIZE',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 6,
                     ),
-                  ),
+                  ).animate().fadeIn(duration: 800.ms).slideX(begin: -0.2, curve: Curves.easeOut),
                   Row(
                     children: [
                       if (isListening)
@@ -391,8 +392,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
 
             // ── Mode switcher ─────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -415,6 +417,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     icon: Icons.bubble_chart_rounded,
                     isActive: currentMode == VisualizerMode.particles,
                     onTap: () => _switchMode(VisualizerMode.particles),
+                  ),
+                  const SizedBox(width: 12),
+                  _ModeButton(
+                    label: 'WAVE',
+                    icon: Icons.waves_rounded,
+                    isActive: currentMode == VisualizerMode.wave,
+                    onTap: () => _switchMode(VisualizerMode.wave),
                   ),
                 ],
               ),
@@ -533,7 +542,9 @@ class _ModeButton extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).animate(target: isActive ? 1 : 0)
+    .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 200.ms, curve: Curves.easeOutBack)
+    .shimmer(duration: 800.ms, color: Colors.white10);
   }
 }
 

@@ -46,6 +46,8 @@ dependencies:
   audio_service: ^0.18.18
   shared_preferences: ^2.5.3
   dart_tags: ^0.4.1
+  flutter_animate: ^4.5.2
+  palette_generator: ^0.3.3+7
 
 dev_dependencies:
   flutter_test:

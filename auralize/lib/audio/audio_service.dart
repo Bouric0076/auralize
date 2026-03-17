@@ -602,13 +602,30 @@ class AudioService {
     }
   }
 
-  bool detectBeat({double threshold = 0.4}) {
-    if (!isListening) return false;
+
+  double _energyAverage = 0;
+  int _beatCooldown = 0;
+
+  bool detectBeat() {
+    if (_beatCooldown > 0) {
+      _beatCooldown--;
+      return false;
+    }
+
     double bass = 0;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 5; i++) {
       bass += smoothedFFT[i];
     }
-    return (bass / 10) > threshold;
+    bass /= 5;
+
+    // simple moving average for dynamic threshold
+    _energyAverage = _energyAverage * 0.95 + bass * 0.05;
+
+    if (bass > _energyAverage * 1.4 && bass > 0.1) {
+      _beatCooldown = 10; // ~160ms at 60fps
+      return true;
+    }
+    return false;
   }
 
   int get currentDurationMs => _currentDurationMs;
