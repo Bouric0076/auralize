@@ -25,6 +25,8 @@ class _VisualizerCanvasState extends ConsumerState<VisualizerCanvas>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final List<Particle> _particles = [];
+  final List<double> _barData = List.filled(64, 0.0);
+  final List<double> _circularData = List.filled(128, 0.0);
 
   @override
   void initState() {
@@ -37,6 +39,39 @@ class _VisualizerCanvasState extends ConsumerState<VisualizerCanvas>
     _controller.addListener(() {
       final AudioService service = ref.read(audioServiceProvider);
       service.updateFFT();
+      
+      // Smooth decay for Bars (Gravity effect)
+      for (int i = 0; i < 64; i++) {
+        // Map 256 bins to 64 bars
+        double value = 0;
+        for (int j = 0; j < 4; j++) {
+          value += service.smoothedFFT[i * 4 + j];
+        }
+        value /= 4;
+        
+        if (value > _barData[i]) {
+          _barData[i] = value; // Rise instantly
+        } else {
+          _barData[i] = _barData[i] * 0.92; // Fall slowly
+        }
+      }
+
+      // Smooth decay for Circular Ring
+      for (int i = 0; i < 128; i++) {
+        // Map 256 bins to 128 segments
+        double value = 0;
+        for (int j = 0; j < 2; j++) {
+          value += service.smoothedFFT[i * 2 + j];
+        }
+        value /= 2;
+
+        if (value > _circularData[i]) {
+          _circularData[i] = value;
+        } else {
+          _circularData[i] = _circularData[i] * 0.94; // Slower fall for ring
+        }
+      }
+
       if (mounted) setState(() {});
     });
   }
@@ -90,10 +125,10 @@ class _VisualizerCanvasState extends ConsumerState<VisualizerCanvas>
     CustomPainter painter;
     switch (mode) {
       case VisualizerMode.bars:
-        painter = BarVisualizer(fftData: service.smoothedFFT);
+        painter = BarVisualizer(fftData: _barData);
         break;
       case VisualizerMode.circular:
-        painter = CircularVisualizer(fftData: service.smoothedFFT);
+        painter = CircularVisualizer(fftData: _circularData);
         break;
       case VisualizerMode.particles:
         painter = ParticleVisualizer(

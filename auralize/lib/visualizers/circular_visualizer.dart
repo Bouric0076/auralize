@@ -33,7 +33,7 @@ class CircularVisualizer extends CustomPainter {
     );
 
     for (int i = 0; i < barCount; i++) {
-      final double magnitude = fftData[i % 256];
+      final double magnitude = fftData[i % fftData.length];
       final double angle = (i / barCount) * 2 * pi - pi / 2;
       final double barLength = magnitude * size.width * 0.18;
 
